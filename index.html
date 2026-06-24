@@ -124,6 +124,8 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .hgrid{display:grid;grid-template-columns:1fr 1fr;gap:3px 12px}
 .hgrid span{font-size:12px;color:var(--text2)}
 .hgrid span b{color:var(--text);font-weight:600}
+.del-btn{background:none;border:none;cursor:pointer;color:var(--text3);padding:4px;display:flex;align-items:center;border-radius:6px;transition:color .15s}
+.del-btn:active{color:var(--red)}
 
 /* settings */
 .sgrp{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:10px}
@@ -318,17 +320,25 @@ function renderDash(c){
 }
 
 function renderHistory(c){
-  const shifts=loadShifts().slice().reverse();
-  if(!shifts.length){
+  const shifts=loadShifts();
+  const reversed=shifts.slice().reverse();
+  if(!reversed.length){
     c.innerHTML='<div class="empty"><span class="ico" style=""><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.422 17.397a2 2 0 0 0 .578 -1.397v-10a2 2 0 0 0 -2 -2h-12c-.549 0 -1.045 .222 -1.405 .582m-1.595 3.418h9"/><path d="M16 3v4"/><path d="M8 3v4"/><path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M3 3l18 18"/></svg></span>Нет смен.<br>Добавь первую через вкладку «Смена».</div>';
     return;
   }
   const el=document.createElement('div');
   el.style.cssText='width:100%';
-  el.innerHTML=shifts.map(s=>{
+  el.innerHTML=reversed.map((s,ri)=>{
     const x=calc(s.gross,s.fuel,s.food,s.repair,s.mom);
+    const origIdx=shifts.length-1-ri;
     return`<div class="hcard">
-      <div class="hcard-top"><div class="hcard-date">${fmtD(s.date)}</div><div class="hcard-mine">${fmt(x.mine)}</div></div>
+      <div class="hcard-top">
+        <div class="hcard-date">${fmtD(s.date)}</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="hcard-mine">${fmt(x.mine)}</div>
+          <button class="del-btn" onclick="deleteShift(${origIdx})" title="Удалить смену"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l16 0"/><path d="M10 11l0 6"/><path d="M14 11l0 6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"/><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/></svg></button>
+        </div>
+      </div>
       <div class="hgrid">
         <span>Грязными: <b>${fmt(s.gross)}</b></span>
         <span>Чистыми: <b>${fmt(x.net)}</b></span>
@@ -339,6 +349,18 @@ function renderHistory(c){
       </div>
     </div>`;}).join('');
   c.appendChild(el);
+}
+
+function deleteShift(idx){
+  if(!confirm('Удалить эту смену?'))return;
+  const shifts=loadShifts();
+  const shift=shifts[idx];
+  shifts.splice(idx,1);
+  saveShifts(shifts);
+  const params=new URLSearchParams({action:'delete',date:shift.date,gross:shift.gross});
+  fetch(SCRIPT_URL+'?'+params.toString(),{mode:'no-cors'}).catch(()=>{});
+  showToast('Смена удалена');
+  render();
 }
 
 function renderAdd(c){
@@ -390,7 +412,8 @@ function saveShift(){
   shifts.push(shift);
   saveShifts(shifts);
   showToast('Сохраняю...');
-  fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(shift)})
+  const params=new URLSearchParams({date:shift.date,gross:shift.gross,fuel:shift.fuel,food:shift.food,repair:shift.repair,mom:shift.mom});
+  fetch(SCRIPT_URL+'?'+params.toString(),{mode:'no-cors'})
     .then(()=>showToast('Смена сохранена в таблицу ✓'))
     .catch(()=>showToast('Сохранено локально (нет связи)'));
   setTimeout(()=>go('dash'),600);
