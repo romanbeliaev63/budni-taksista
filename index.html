@@ -462,6 +462,7 @@ function saveCfgForm(){
   CFG.goalPillow=+document.getElementById('s-gpil').value||100000;
   CFG.goalCar=+document.getElementById('s-gcar').value||1000000;
   saveCfg();
+  syncCfgToSheets();
   showToast('Настройки сохранены');
 }
 
@@ -483,7 +484,30 @@ function showToast(msg){
   setTimeout(()=>t.classList.remove('show'),2200);
 }
 
+function loadCfgFromSheets(){
+  const cbName='_cfg'+Date.now();
+  const s=document.createElement('script');
+  window[cbName]=function(data){
+    if(data&&typeof data==='object'&&Object.keys(data).length>0){
+      CFG=Object.assign({},DEF_CFG,data);
+      saveCfg();
+      render();
+    }
+    delete window[cbName];
+    if(s.parentNode)s.parentNode.removeChild(s);
+  };
+  s.onerror=function(){delete window[cbName];if(s.parentNode)s.parentNode.removeChild(s);};
+  s.src=SCRIPT_URL+'?action=get_settings&callback='+cbName;
+  document.body.appendChild(s);
+}
+
+function syncCfgToSheets(){
+  const params=new URLSearchParams({action:'save_settings',debtMom:CFG.debtMom,goalMonth:CFG.goalMonth,planShifts:CFG.planShifts,pctRepair:CFG.pctRepair,pctPillow:CFG.pctPillow,pctCar:CFG.pctCar,goalRepair:CFG.goalRepair,goalPillow:CFG.goalPillow,goalCar:CFG.goalCar});
+  fetch(SCRIPT_URL+'?'+params.toString(),{mode:'no-cors'}).catch(()=>{});
+}
+
 render();
+loadCfgFromSheets();
 </script>
 </body>
 </html>
