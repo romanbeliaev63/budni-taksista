@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Мой Такси">
+<meta name="theme-color" content="#1B6B3A">
+<title>Мой Такси</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --green:#1B6B3A;--green-lt:#E8F5E9;--green-md:#43A047;
+  --red:#7B1A1A;--red-lt:#FFEBEE;
+  --yellow:#BF360C;--yellow-lt:#FFF3E0;
+  --blue:#0D47A1;--blue-lt:#E3F2FD;
+  --purple:#4A148C;--purple-lt:#F3E5F5;
+  --bg:#FFFFFF;--bg2:#F5F5F5;--bg3:#EEEEEE;
+  --text:#1A1A1A;--text2:#757575;--text3:#BDBDBD;
+  --border:#E0E0E0;
+  --r:12px;--r2:8px
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#1C1C1E;--bg2:#2C2C2E;--bg3:#3A3A3C;
+    --text:#F2F2F7;--text2:#8E8E93;--text3:#48484A;
+    --border:#38383A;
+    --green-lt:#0A2E14;--green-md:#2E7D32;
+    --red-lt:#2E0A0A;--yellow-lt:#2E1A00;
+    --blue-lt:#0A1929;--purple-lt:#1A0A2E
+  }
+}
+html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg2)}
+.app{display:flex;flex-direction:column;height:100%;max-width:480px;margin:0 auto;background:var(--bg2);position:relative}
+
+/* topbar */
+.topbar{background:var(--bg);border-bottom:1px solid var(--border);padding:env(safe-area-inset-top,0) 16px 0;padding-top:calc(env(safe-area-inset-top,12px) + 12px);padding-bottom:10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar-l .t1{font-size:16px;font-weight:600;color:var(--text)}
+.topbar-l .t2{font-size:12px;color:var(--text2);margin-top:1px}
+.topbar-r{font-size:12px;color:var(--text2);text-align:right;line-height:1.5}
+
+/* content */
+.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px;display:flex;flex-direction:column;gap:10px}
+
+/* nav */
+.nav{background:var(--bg);border-top:1px solid var(--border);display:flex;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom,0)}
+.nav-btn{flex:1;padding:10px 0 8px;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;color:var(--text2);font-size:10px;font-family:inherit;transition:color .15s}
+.nav-btn i{font-size:24px}
+.nav-btn.active{color:var(--green)}
+
+/* cards */
+.card{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px}
+.card.green{background:var(--green-lt);border-color:var(--green-md)}
+.lbl{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.big{font-size:28px;font-weight:700;color:var(--green);line-height:1.1}
+.sub{font-size:12px;color:var(--text2);margin-top:4px}
+.sec{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;padding-top:2px}
+
+/* transfers */
+.tlist{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.trow{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--border)}
+.trow:last-child{border-bottom:none}
+.trow-l{font-size:14px;color:var(--text);display:flex;align-items:center;gap:10px}
+.tico{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.trow-r{font-size:14px;font-weight:600}
+
+/* grid metrics */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.met{background:var(--bg);border:1px solid var(--border);border-radius:var(--r2);padding:10px 12px}
+.met-l{font-size:11px;color:var(--text2);margin-bottom:4px}
+.met-v{font-size:16px;font-weight:600;color:var(--text)}
+
+/* status */
+.status{display:flex;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:13px 16px}
+.sdot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.stxt{font-size:14px;font-weight:600}
+
+/* progress */
+.prog-wrap{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:16px}
+.pi-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.pi-name{font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:6px}
+.pi-name i{font-size:15px}
+.pi-pct{font-size:12px;font-weight:600}
+.pbar{height:7px;border-radius:4px;overflow:hidden;margin-bottom:5px}
+.pbar-fill{height:100%;border-radius:4px;transition:width .4s ease}
+.pi-meta{display:flex;justify-content:space-between}
+.pi-meta span{font-size:11px;color:var(--text2)}
+
+/* add button */
+.add-btn{background:var(--green);color:#fff;border:none;border-radius:var(--r);padding:15px;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;font-family:inherit;transition:opacity .15s;-webkit-appearance:none}
+.add-btn:active{opacity:.85}
+.add-btn i{font-size:18px}
+
+/* form */
+.fhd{display:flex;align-items:center;gap:10px;padding:14px 0 6px}
+.fhd h2{font-size:18px;font-weight:600;color:var(--text)}
+.back-btn{background:none;border:none;cursor:pointer;color:var(--text2);display:flex;align-items:center;padding:4px;border-radius:var(--r2)}
+.fgrp{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:10px}
+.frow{display:flex;align-items:center;padding:13px 16px;border-bottom:1px solid var(--border)}
+.frow:last-child{border-bottom:none}
+.frow-l{font-size:14px;color:var(--text2);flex:1;display:flex;align-items:center;gap:8px}
+.frow-l i{font-size:17px}
+.finp{background:none;border:none;outline:none;font-size:16px;font-weight:600;color:var(--text);width:130px;text-align:right;font-family:inherit;-webkit-appearance:none}
+.finp[type=date]{font-size:14px;font-weight:400;color:var(--text)}
+.finp::placeholder{color:var(--text3);font-weight:400}
+.fsuf{font-size:14px;color:var(--text2);margin-left:3px}
+.prev{background:var(--green-lt);border:1px solid var(--green-md);border-radius:var(--r);padding:13px 16px;margin-bottom:10px}
+.prev-t{font-size:11px;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;font-weight:600}
+.prev-row{display:flex;justify-content:space-between;margin-bottom:5px}
+.prev-row:last-child{margin-bottom:0}
+.prev-row span:first-child{font-size:13px;color:var(--text2)}
+.prev-row span:last-child{font-size:13px;font-weight:600;color:var(--green)}
+.save-btn{background:var(--green);color:#fff;border:none;border-radius:var(--r);padding:16px;font-size:16px;font-weight:600;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;-webkit-appearance:none;transition:opacity .15s}
+.save-btn:active{opacity:.85}
+.save-btn i{font-size:18px}
+
+/* history */
+.hcard{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:13px 16px;margin-bottom:8px}
+.hcard-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.hcard-date{font-size:14px;font-weight:600;color:var(--text)}
+.hcard-mine{font-size:15px;font-weight:700;color:var(--green)}
+.hgrid{display:grid;grid-template-columns:1fr 1fr;gap:3px 12px}
+.hgrid span{font-size:12px;color:var(--text2)}
+.hgrid span b{color:var(--text);font-weight:600}
+
+/* settings */
+.sgrp{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:10px}
+.srow{display:flex;align-items:center;padding:13px 16px;border-bottom:1px solid var(--border)}
+.srow:last-child{border-bottom:none}
+.srow-l{font-size:14px;color:var(--text);flex:1}
+.srow-l small{display:block;font-size:11px;color:var(--text2);margin-top:1px}
+.sinp{background:none;border:none;outline:none;font-size:15px;font-weight:600;color:var(--green);width:110px;text-align:right;font-family:inherit;-webkit-appearance:none}
+.sinp::placeholder{color:var(--text3)}
+.ssuf{font-size:13px;color:var(--text2);margin-left:2px}
+.save-cfg-btn{background:var(--green);color:#fff;border:none;border-radius:var(--r);padding:14px;font-size:15px;font-weight:600;cursor:pointer;width:100%;font-family:inherit;-webkit-appearance:none}
+
+/* toast */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(8px);background:rgba(0,0,0,.82);color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;opacity:0;transition:all .22s;pointer-events:none;z-index:999;white-space:nowrap;backdrop-filter:blur(8px)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.empty{text-align:center;padding:48px 0;color:var(--text2);font-size:14px}
+.empty i{font-size:40px;display:block;margin-bottom:10px;color:var(--text3)}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="topbar">
+    <div class="topbar-l">
+      <div class="t1"><i class="ti ti-car" style="font-size:15px;vertical-align:-1px;margin-right:5px"></i>Финансы таксиста</div>
+      <div class="t2">Лада Веста 2016</div>
+    </div>
+    <div class="topbar-r" id="top-date"></div>
+  </div>
+  <div class="content" id="content"></div>
+  <div class="nav">
+    <button class="nav-btn active" id="nb-dash" onclick="go('dash')"><i class="ti ti-home"></i>Главная</button>
+    <button class="nav-btn" id="nb-history" onclick="go('history')"><i class="ti ti-list"></i>История</button>
+    <button class="nav-btn" id="nb-add" onclick="go('add')"><i class="ti ti-plus"></i>Смена</button>
+    <button class="nav-btn" id="nb-settings" onclick="go('settings')"><i class="ti ti-settings"></i>Настройки</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const DEF_CFG={debtMom:130000,goalMonth:150000,planShifts:25,pctRepair:20,pctPillow:10,pctCar:0,goalRepair:50000,goalPillow:100000,goalCar:1000000};
+let CFG=Object.assign({},DEF_CFG);
+
+function loadCfg(){try{const c=JSON.parse(localStorage.getItem('cfg')||'{}');CFG=Object.assign({},DEF_CFG,c);}catch(e){CFG=Object.assign({},DEF_CFG);}}
+function saveCfg(){localStorage.setItem('cfg',JSON.stringify(CFG));}
+function loadShifts(){try{return JSON.parse(localStorage.getItem('shifts')||'[]');}catch(e){return[];}}
+function saveShifts(s){localStorage.setItem('shifts',JSON.stringify(s));}
+
+function calc(g,fu,fo,r,m){
+  const n=g-fu-fo-r;
+  const rp=Math.round(n*CFG.pctRepair/100);
+  const pi=Math.round(n*CFG.pctPillow/100);
+  const ca=Math.round(n*CFG.pctCar/100);
+  return{net:n,repair:rp,pillow:pi,car:ca,mine:n-rp-pi-ca-m};
+}
+function fmt(n){return Math.round(n).toLocaleString('ru-RU')+'\u00a0₽';}
+function fmtD(d){return new Date(d+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short',weekday:'short'});}
+
+let cur='dash';
+loadCfg();
+
+function go(tab){
+  cur=tab;
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const nb=document.getElementById('nb-'+tab);
+  if(nb)nb.classList.add('active');
+  render();
+}
+
+function render(){
+  const now=new Date();
+  document.getElementById('top-date').innerHTML=
+    now.toLocaleDateString('ru-RU',{day:'numeric',month:'short'})+'<br>'+
+    now.toLocaleDateString('ru-RU',{weekday:'short'});
+  const c=document.getElementById('content');
+  c.innerHTML='';
+  if(cur==='dash')renderDash(c);
+  else if(cur==='history')renderHistory(c);
+  else if(cur==='add')renderAdd(c);
+  else if(cur==='settings')renderSettings(c);
+}
+
+function renderDash(c){
+  const shifts=loadShifts();
+  const last=shifts[shifts.length-1];
+  const now=new Date();
+  const ym=now.toISOString().slice(0,7);
+  const thisMonth=shifts.filter(s=>s.date&&s.date.slice(0,7)===ym);
+  const worked=thisMonth.length;
+  const monthNet=thisMonth.reduce((a,s)=>a+calc(s.gross,s.fuel,s.food,s.repair,s.mom).net,0);
+  const goalPct=CFG.goalMonth>0?Math.round(monthNet/CFG.goalMonth*100):0;
+  const totalPaid=shifts.reduce((a,s)=>a+(s.mom||0),0);
+  const totalRepair=shifts.reduce((a,s)=>a+calc(s.gross,s.fuel,s.food,s.repair,s.mom).repair,0);
+  const totalPillow=shifts.reduce((a,s)=>a+calc(s.gross,s.fuel,s.food,s.repair,s.mom).pillow,0);
+  const totalCar=shifts.reduce((a,s)=>a+calc(s.gross,s.fuel,s.food,s.repair,s.mom).car,0);
+  const avgNet=shifts.length>0?shifts.reduce((a,s)=>a+calc(s.gross,s.fuel,s.food,s.repair,s.mom).net,0)/shifts.length:0;
+
+  let mineVal='—',mineSub='Добавь первую смену';
+  let transfers=[];
+  if(last){
+    const lc=calc(last.gross,last.fuel,last.food,last.repair,last.mom);
+    mineVal=fmt(lc.mine);
+    mineSub='Смена '+fmtD(last.date);
+    transfers=[
+      {icon:'ti-tool',l:'Ремонт. фонд',v:lc.repair,bg:'var(--yellow-lt)',c:'#BF360C'},
+      {icon:'ti-heart',l:'Маме',v:last.mom,bg:'var(--red-lt)',c:'var(--red)'},
+      {icon:'ti-building-bank',l:'Подушка',v:lc.pillow,bg:'var(--blue-lt)',c:'var(--blue)'},
+      {icon:'ti-car',l:'Нов. машина',v:lc.car,bg:'var(--purple-lt)',c:'var(--purple)'},
+      {icon:'ti-wallet',l:'Себе',v:lc.mine,bg:'var(--green-lt)',c:'var(--green)'},
+    ];
+  }
+
+  const daysInMonth=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+  const daysLeft=daysInMonth-now.getDate()+1;
+  const shiftsLeft=CFG.planShifts-worked;
+  let sc,st,emoji;
+  if(shiftsLeft<=0){sc='var(--green)';st='План выполнен!';emoji='🟢';}
+  else if(shiftsLeft<daysLeft*.6){sc='var(--green)';st='Можно не работать';emoji='🟢';}
+  else if(shiftsLeft<=daysLeft){sc='#E65100';st='Работаем по плану';emoji='🟡';}
+  else{sc='var(--red)';st='Лучше выйти на линию';emoji='🔴';}
+
+  const goals=[
+    {name:'Долг маме',icon:'ti-heart',acc:totalPaid,goal:CFG.debtMom,c:'var(--red)',bg:'var(--red-lt)'},
+    {name:'Ремонт. фонд',icon:'ti-tool',acc:totalRepair,goal:CFG.goalRepair,c:'#BF360C',bg:'var(--yellow-lt)'},
+    {name:'Подушка',icon:'ti-building-bank',acc:totalPillow,goal:CFG.goalPillow,c:'var(--blue)',bg:'var(--blue-lt)'},
+    {name:'Нов. машина',icon:'ti-car',acc:totalCar,goal:CFG.goalCar,c:'var(--purple)',bg:'var(--purple-lt)'},
+  ];
+
+  const el=document.createElement('div');
+  el.style.cssText='display:flex;flex-direction:column;gap:10px;width:100%';
+  el.innerHTML=`
+    <div class="card green">
+      <div class="lbl">Мои деньги · последняя смена</div>
+      <div class="big">${mineVal}</div>
+      <div class="sub">${mineSub}</div>
+    </div>
+    ${transfers.length?`
+    <div class="sec">Перевести сегодня</div>
+    <div class="tlist">${transfers.map(t=>`
+      <div class="trow">
+        <div class="trow-l"><div class="tico" style="background:${t.bg}"><i class="ti ${t.icon}" style="font-size:14px;color:${t.c}"></i></div>${t.l}</div>
+        <div class="trow-r" style="color:${t.c}">${t.v>0?fmt(t.v):'—'}</div>
+      </div>`).join('')}</div>`:''}
+    <div class="sec">Статус дня</div>
+    <div class="status">
+      <div class="sdot" style="background:${sc}"></div>
+      <div class="stxt" style="color:${sc}">${emoji} ${st}</div>
+    </div>
+    <div class="sec">Смены месяца</div>
+    <div class="g2">
+      <div class="met"><div class="met-l">Отработано</div><div class="met-v">${worked} из ${CFG.planShifts}</div></div>
+      <div class="met"><div class="met-l">Осталось смен</div><div class="met-v">${Math.max(shiftsLeft,0)}</div></div>
+      <div class="met"><div class="met-l">Доход за месяц</div><div class="met-v" style="font-size:14px">${fmt(monthNet)}</div></div>
+      <div class="met"><div class="met-l">Цель месяца</div>
+        <div class="met-v" style="color:${goalPct>=100?'var(--green)':'var(--text)'}">
+          ${goalPct}%
+          <div style="height:5px;background:var(--bg3);border-radius:3px;margin-top:5px;overflow:hidden">
+            <div style="height:100%;width:${Math.min(goalPct,100)}%;background:var(--green);border-radius:3px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sec">Прогресс целей</div>
+    <div class="prog-wrap">${goals.map(g=>{
+      const pct=g.goal>0?Math.min(Math.round(g.acc/g.goal*100),100):0;
+      const sl=avgNet>0?Math.ceil(Math.max(g.goal-g.acc,0)/avgNet):null;
+      return`<div>
+        <div class="pi-hd"><div class="pi-name"><i class="ti ${g.icon}" style="color:${g.c}"></i>${g.name}</div><div class="pi-pct" style="color:${g.c}">${pct}%</div></div>
+        <div class="pbar" style="background:${g.bg}"><div class="pbar-fill" style="width:${pct}%;background:${g.c}"></div></div>
+        <div class="pi-meta"><span>${fmt(g.acc)} из ${fmt(g.goal)}</span><span>${sl?'~'+sl+' смен':'—'}</span></div>
+      </div>`;}).join('')}</div>
+    <button class="add-btn" onclick="go('add')"><i class="ti ti-plus"></i>Добавить смену</button>
+    <div style="height:4px"></div>
+  `;
+  c.appendChild(el);
+}
+
+function renderHistory(c){
+  const shifts=loadShifts().slice().reverse();
+  if(!shifts.length){
+    c.innerHTML='<div class="empty"><i class="ti ti-calendar-off"></i>Нет смен.<br>Добавь первую через вкладку «Смена».</div>';
+    return;
+  }
+  const el=document.createElement('div');
+  el.style.cssText='width:100%';
+  el.innerHTML=shifts.map(s=>{
+    const x=calc(s.gross,s.fuel,s.food,s.repair,s.mom);
+    return`<div class="hcard">
+      <div class="hcard-top"><div class="hcard-date">${fmtD(s.date)}</div><div class="hcard-mine">${fmt(x.mine)}</div></div>
+      <div class="hgrid">
+        <span>Грязными: <b>${fmt(s.gross)}</b></span>
+        <span>Чистыми: <b>${fmt(x.net)}</b></span>
+        <span>Бензин: <b>${fmt(s.fuel)}</b></span>
+        <span>Маме: <b>${fmt(s.mom)}</b></span>
+        <span>Ремонт: <b>${fmt(s.repair)}</b></span>
+        <span>Подушка: <b>${fmt(x.pillow)}</b></span>
+      </div>
+    </div>`;}).join('');
+  c.appendChild(el);
+}
+
+function renderAdd(c){
+  const today=new Date().toISOString().slice(0,10);
+  const el=document.createElement('div');
+  el.style.cssText='width:100%;padding-bottom:20px';
+  el.innerHTML=`
+    <div class="fhd">
+      <button class="back-btn" onclick="go('dash')"><i class="ti ti-arrow-left" style="font-size:24px"></i></button>
+      <h2>Новая смена</h2>
+    </div>
+    <div class="fgrp">
+      <div class="frow"><div class="frow-l"><i class="ti ti-calendar"></i>Дата</div><input class="finp" type="date" id="fd" value="${today}" style="width:150px;font-size:14px"></div>
+      <div class="frow"><div class="frow-l"><i class="ti ti-cash"></i>Грязными</div><input class="finp" type="number" id="fg" placeholder="0" inputmode="numeric"><span class="fsuf">₽</span></div>
+      <div class="frow"><div class="frow-l"><i class="ti ti-gas-station"></i>Бензин</div><input class="finp" type="number" id="ff" placeholder="0" inputmode="numeric"><span class="fsuf">₽</span></div>
+      <div class="frow"><div class="frow-l"><i class="ti ti-coffee"></i>Еда</div><input class="finp" type="number" id="fe" placeholder="0" inputmode="numeric"><span class="fsuf">₽</span></div>
+      <div class="frow"><div class="frow-l"><i class="ti ti-tool"></i>Ремонт</div><input class="finp" type="number" id="fr" placeholder="0" inputmode="numeric"><span class="fsuf">₽</span></div>
+      <div class="frow"><div class="frow-l"><i class="ti ti-heart"></i>Маме</div><input class="finp" type="number" id="fm" placeholder="0" inputmode="numeric"><span class="fsuf">₽</span></div>
+    </div>
+    <div class="prev" id="prev" style="display:none">
+      <div class="prev-t">Итог смены</div>
+      <div id="prev-rows"></div>
+    </div>
+    <button class="save-btn" onclick="saveShift()"><i class="ti ti-check"></i>Сохранить смену</button>
+  `;
+  c.appendChild(el);
+  ['fg','ff','fe','fr','fm'].forEach(id=>{
+    document.getElementById(id).addEventListener('input',updPrev);
+  });
+}
+
+function updPrev(){
+  const g=+document.getElementById('fg').value||0;
+  if(!g){document.getElementById('prev').style.display='none';return;}
+  const x=calc(g,+document.getElementById('ff').value||0,+document.getElementById('fe').value||0,+document.getElementById('fr').value||0,+document.getElementById('fm').value||0);
+  const rows=[['Чистыми',x.net],['Ремонт. фонд',x.repair],['Подушка',x.pillow],['Маме',+document.getElementById('fm').value||0],['Мои деньги',x.mine]];
+  document.getElementById('prev-rows').innerHTML=rows.map(r=>`<div class="prev-row"><span>${r[0]}</span><span>${fmt(r[1])}</span></div>`).join('');
+  document.getElementById('prev').style.display='block';
+}
+
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycbz7xKuRvqzbYCsZwhks28yn49n02DO4V6RWeOFe8zG_YhYzaxFhF5FJWkMlWLWwd3m0/exec';
+
+function saveShift(){
+  const date=document.getElementById('fd').value;
+  const gross=+document.getElementById('fg').value||0;
+  if(!date||!gross){showToast('Укажи дату и выручку');return;}
+  const shift={date,gross,fuel:+document.getElementById('ff').value||0,food:+document.getElementById('fe').value||0,repair:+document.getElementById('fr').value||0,mom:+document.getElementById('fm').value||0};
+  const shifts=loadShifts();
+  shifts.push(shift);
+  saveShifts(shifts);
+  showToast('Сохраняю...');
+  fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify(shift)})
+    .then(()=>showToast('Смена сохранена в таблицу ✓'))
+    .catch(()=>showToast('Сохранено локально (нет связи)'));
+  setTimeout(()=>go('dash'),600);
+}
+
+function renderSettings(c){
+  const el=document.createElement('div');
+  el.style.cssText='width:100%;padding-bottom:20px';
+  el.innerHTML=`
+    <div class="fhd" style="padding-top:14px"><h2>Настройки</h2></div>
+    <div class="sec" style="margin-bottom:8px">Долг и цели</div>
+    <div class="sgrp">
+      <div class="srow"><div class="srow-l">Начальный долг маме<small>Стартовая сумма долга</small></div><input class="sinp" type="number" id="s-debt" value="${CFG.debtMom}" inputmode="numeric"><span class="ssuf">₽</span></div>
+      <div class="srow"><div class="srow-l">Цель месяца<small>Чистый доход в месяц</small></div><input class="sinp" type="number" id="s-gmon" value="${CFG.goalMonth}" inputmode="numeric"><span class="ssuf">₽</span></div>
+      <div class="srow"><div class="srow-l">План смен в месяц</div><input class="sinp" type="number" id="s-psh" value="${CFG.planShifts}" inputmode="numeric"><span class="ssuf">шт</span></div>
+    </div>
+    <div class="sec" style="margin-bottom:8px">Проценты отчислений</div>
+    <div class="sgrp">
+      <div class="srow"><div class="srow-l">Ремонтный фонд<small>% от чистого дохода</small></div><input class="sinp" type="number" id="s-prep" value="${CFG.pctRepair}" inputmode="numeric"><span class="ssuf">%</span></div>
+      <div class="srow"><div class="srow-l">Подушка безопасности<small>% от чистого дохода</small></div><input class="sinp" type="number" id="s-ppil" value="${CFG.pctPillow}" inputmode="numeric"><span class="ssuf">%</span></div>
+      <div class="srow"><div class="srow-l">На новую машину<small>% от чистого дохода</small></div><input class="sinp" type="number" id="s-pcar" value="${CFG.pctCar}" inputmode="numeric"><span class="ssuf">%</span></div>
+    </div>
+    <div class="sec" style="margin-bottom:8px">Цели накоплений</div>
+    <div class="sgrp">
+      <div class="srow"><div class="srow-l">Цель ремонтного фонда</div><input class="sinp" type="number" id="s-grep" value="${CFG.goalRepair}" inputmode="numeric"><span class="ssuf">₽</span></div>
+      <div class="srow"><div class="srow-l">Цель подушки</div><input class="sinp" type="number" id="s-gpil" value="${CFG.goalPillow}" inputmode="numeric"><span class="ssuf">₽</span></div>
+      <div class="srow"><div class="srow-l">Цель — новая машина</div><input class="sinp" type="number" id="s-gcar" value="${CFG.goalCar}" inputmode="numeric"><span class="ssuf">₽</span></div>
+    </div>
+    <button class="save-cfg-btn" onclick="saveCfgForm()">Сохранить настройки</button>
+    <div style="height:20px"></div>
+    <div style="text-align:center">
+      <button onclick="if(confirm('Удалить все смены?')){localStorage.removeItem('shifts');go('dash');showToast('Данные удалены');}" style="background:none;border:none;color:var(--red);font-size:13px;cursor:pointer;font-family:inherit;padding:8px">Удалить все данные смен</button>
+    </div>
+  `;
+  c.appendChild(el);
+}
+
+function saveCfgForm(){
+  CFG.debtMom=+document.getElementById('s-debt').value||130000;
+  CFG.goalMonth=+document.getElementById('s-gmon').value||150000;
+  CFG.planShifts=+document.getElementById('s-psh').value||25;
+  CFG.pctRepair=+document.getElementById('s-prep').value||20;
+  CFG.pctPillow=+document.getElementById('s-ppil').value||10;
+  CFG.pctCar=+document.getElementById('s-pcar').value||0;
+  CFG.goalRepair=+document.getElementById('s-grep').value||50000;
+  CFG.goalPillow=+document.getElementById('s-gpil').value||100000;
+  CFG.goalCar=+document.getElementById('s-gcar').value||1000000;
+  saveCfg();
+  showToast('Настройки сохранены');
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+render();
+</script>
+</body>
+</html>
