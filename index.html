@@ -189,7 +189,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 <div class="toast" id="toast"></div>
 
 <script>
-const DEF_CFG={debtMom:130000,goalMonth:150000,planShifts:25,pctRepair:20,pctPillow:10,pctCar:0,goalRepair:50000,goalPillow:100000,goalCar:1000000};
+const DEF_CFG={debtMom:130000,goalMonth:150000,planShifts:25,pctRepair:20,pctPillow:10,pctCar:0,goalRepair:50000,goalPillow:100000,goalCar:1000000,initRepair:0,initPillow:0,initCar:0,initMom:0};
 let CFG=Object.assign({},DEF_CFG);
 
 function loadCfg(){try{const c=JSON.parse(localStorage.getItem('cfg')||'{}');CFG=Object.assign({},DEF_CFG,c);}catch(e){CFG=Object.assign({},DEF_CFG);}}
@@ -245,7 +245,7 @@ function getDreamDate(shifts,fundExpenses){
   if(!CFG.goalCar||CFG.goalCar<=0)return null;
   const totalCarSaved=shifts.reduce((a,s)=>a+calc(s.gross,s.fuel,s.food,s.mom).car,0);
   const totalCarSpent=fundExpenses.filter(e=>e.fund==='car').reduce((a,e)=>a+e.amount,0);
-  const carBalance=totalCarSaved-totalCarSpent;
+  const carBalance=(CFG.initCar||0)+totalCarSaved-totalCarSpent;
   const remaining=CFG.goalCar-carBalance;
   if(remaining<=0)return{done:true};
   const monthData={};
@@ -273,16 +273,16 @@ function renderDash(c){
   const monthNet=thisMonth.reduce((a,s)=>a+calc(s.gross,s.fuel,s.food,s.mom).net,0);
   const goalPct=CFG.goalMonth>0?Math.round(monthNet/CFG.goalMonth*100):0;
 
-  const totalPaid=shifts.reduce((a,s)=>a+(s.mom||0),0);
+  const totalPaid=(CFG.initMom||0)+shifts.reduce((a,s)=>a+(s.mom||0),0);
   const totalRepairAcc=shifts.reduce((a,s)=>a+calc(s.gross,s.fuel,s.food,s.mom).repair,0);
   const totalPillowAcc=shifts.reduce((a,s)=>a+calc(s.gross,s.fuel,s.food,s.mom).pillow,0);
   const totalCarAcc=shifts.reduce((a,s)=>a+calc(s.gross,s.fuel,s.food,s.mom).car,0);
   const repairSpent=fundExpenses.filter(e=>e.fund==='repair').reduce((a,e)=>a+e.amount,0);
   const pillowSpent=fundExpenses.filter(e=>e.fund==='pillow').reduce((a,e)=>a+e.amount,0);
   const carSpent=fundExpenses.filter(e=>e.fund==='car').reduce((a,e)=>a+e.amount,0);
-  const totalRepair=totalRepairAcc-repairSpent;
-  const totalPillow=totalPillowAcc-pillowSpent;
-  const totalCar=totalCarAcc-carSpent;
+  const totalRepair=(CFG.initRepair||0)+totalRepairAcc-repairSpent;
+  const totalPillow=(CFG.initPillow||0)+totalPillowAcc-pillowSpent;
+  const totalCar=(CFG.initCar||0)+totalCarAcc-carSpent;
   const avgNet=shifts.length>0?shifts.reduce((a,s)=>a+calc(s.gross,s.fuel,s.food,s.mom).net,0)/shifts.length:0;
 
   const dream=getDreamDate(shifts,fundExpenses);
@@ -711,6 +711,13 @@ function renderSettings(c){
       <div class="srow"><div class="srow-l">Цель подушки</div><input class="sinp" type="number" id="s-gpil" value="${CFG.goalPillow}" inputmode="numeric"><span class="ssuf">₽</span></div>
       <div class="srow"><div class="srow-l">Цель — новая машина</div><input class="sinp" type="number" id="s-gcar" value="${CFG.goalCar}" inputmode="numeric"><span class="ssuf">₽</span></div>
     </div>
+    <div class="sec" style="margin-bottom:8px">Текущие остатки фондов<small style="display:block;font-size:11px;font-weight:400;color:var(--text2);margin-top:2px">Введи реальные суммы с Яндекс Пэй — приложение добавит к ним новые отчисления</small></div>
+    <div class="sgrp">
+      <div class="srow"><div class="srow-l">Ремонтный фонд<small>Сейчас на счёте</small></div><input class="sinp" type="number" id="s-irep" value="${CFG.initRepair||0}" inputmode="numeric"><span class="ssuf">₽</span></div>
+      <div class="srow"><div class="srow-l">Подушка безопасности<small>Сейчас на счёте</small></div><input class="sinp" type="number" id="s-ipil" value="${CFG.initPillow||0}" inputmode="numeric"><span class="ssuf">₽</span></div>
+      <div class="srow"><div class="srow-l">Новая машина<small>Сейчас на счёте</small></div><input class="sinp" type="number" id="s-icar" value="${CFG.initCar||0}" inputmode="numeric"><span class="ssuf">₽</span></div>
+      <div class="srow"><div class="srow-l">Долг маме<small>Уже выплачено</small></div><input class="sinp" type="number" id="s-imom" value="${CFG.initMom||0}" inputmode="numeric"><span class="ssuf">₽</span></div>
+    </div>
     <button class="save-cfg-btn" onclick="saveCfgForm()">Сохранить настройки</button>
     <div style="height:20px"></div>
     <div style="text-align:center">
@@ -730,6 +737,10 @@ function saveCfgForm(){
   CFG.goalRepair=+document.getElementById('s-grep').value||50000;
   CFG.goalPillow=+document.getElementById('s-gpil').value||100000;
   CFG.goalCar=+document.getElementById('s-gcar').value||1000000;
+  CFG.initRepair=+document.getElementById('s-irep').value||0;
+  CFG.initPillow=+document.getElementById('s-ipil').value||0;
+  CFG.initCar=+document.getElementById('s-icar').value||0;
+  CFG.initMom=+document.getElementById('s-imom').value||0;
   saveCfg();
   syncCfgToSheets();
   showToast('Настройки сохранены');
@@ -765,7 +776,7 @@ function loadCfgFromSheets(){
 }
 
 function syncCfgToSheets(){
-  const params=new URLSearchParams({action:'save_settings',debtMom:CFG.debtMom,goalMonth:CFG.goalMonth,planShifts:CFG.planShifts,pctRepair:CFG.pctRepair,pctPillow:CFG.pctPillow,pctCar:CFG.pctCar,goalRepair:CFG.goalRepair,goalPillow:CFG.goalPillow,goalCar:CFG.goalCar});
+  const params=new URLSearchParams({action:'save_settings',debtMom:CFG.debtMom,goalMonth:CFG.goalMonth,planShifts:CFG.planShifts,pctRepair:CFG.pctRepair,pctPillow:CFG.pctPillow,pctCar:CFG.pctCar,goalRepair:CFG.goalRepair,goalPillow:CFG.goalPillow,goalCar:CFG.goalCar,initRepair:CFG.initRepair||0,initPillow:CFG.initPillow||0,initCar:CFG.initCar||0,initMom:CFG.initMom||0});
   fetch(SCRIPT_URL+'?'+params.toString(),{mode:'no-cors'}).catch(()=>{});
 }
 
