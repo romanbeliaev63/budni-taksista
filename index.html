@@ -877,20 +877,21 @@ function renderSettings(c){
 }
 
 function saveCfgForm(){
-  CFG.debtMom=+document.getElementById('s-debt').value||130000;
-  CFG.goalMonth=+document.getElementById('s-gmon').value||150000;
-  CFG.planShifts=+document.getElementById('s-psh').value||25;
-  CFG.pctMom=+document.getElementById('s-pmom').value||0;
-  CFG.pctRepair=+document.getElementById('s-prep').value||20;
-  CFG.pctPillow=+document.getElementById('s-ppil').value||10;
-  CFG.pctCar=+document.getElementById('s-pcar').value||0;
-  CFG.goalRepair=+document.getElementById('s-grep').value||50000;
-  CFG.goalPillow=+document.getElementById('s-gpil').value||100000;
-  CFG.goalCar=+document.getElementById('s-gcar').value||1000000;
-  CFG.initRepair=+document.getElementById('s-irep').value||0;
-  CFG.initPillow=+document.getElementById('s-ipil').value||0;
-  CFG.initCar=+document.getElementById('s-icar').value||0;
-  CFG.initMom=+document.getElementById('s-imom').value||0;
+  const n=id=>+document.getElementById(id).value;
+  CFG.debtMom=n('s-debt')||130000;
+  CFG.goalMonth=n('s-gmon')||150000;
+  CFG.planShifts=n('s-psh')||25;
+  CFG.pctMom=n('s-pmom');
+  CFG.pctRepair=n('s-prep');
+  CFG.pctPillow=n('s-ppil');
+  CFG.pctCar=n('s-pcar');
+  CFG.goalRepair=n('s-grep')||50000;
+  CFG.goalPillow=n('s-gpil')||100000;
+  CFG.goalCar=n('s-gcar')||1000000;
+  CFG.initRepair=n('s-irep');
+  CFG.initPillow=n('s-ipil');
+  CFG.initCar=n('s-icar');
+  CFG.initMom=n('s-imom');
   saveCfg();
   syncCfgToSheets();
   showToast('Настройки сохранены');
@@ -917,7 +918,12 @@ function loadCfgFromSheets(){
   const cbName='_cfg'+Date.now();
   const s=document.createElement('script');
   window[cbName]=function(data){
-    if(data&&typeof data==='object'&&Object.keys(data).length>0){CFG=Object.assign({},DEF_CFG,data);saveCfg();render();}
+    if(data&&typeof data==='object'){
+      const knownKeys=Object.keys(DEF_CFG);
+      const valid={};
+      knownKeys.forEach(k=>{if(k in data&&typeof data[k]==='number')valid[k]=data[k];});
+      if(Object.keys(valid).length>0){CFG=Object.assign({},CFG,valid);saveCfg();render();}
+    }
     delete window[cbName];if(s.parentNode)s.parentNode.removeChild(s);
   };
   s.onerror=function(){delete window[cbName];if(s.parentNode)s.parentNode.removeChild(s);};
