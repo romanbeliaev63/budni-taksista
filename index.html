@@ -278,12 +278,12 @@ function renderDash(c){
   const goalPct=CFG.goalMonth>0?Math.round(monthNet/CFG.goalMonth*100):0;
 
   const fundDeposits=loadFundDeposits();
-  const totalMomAcc=(CFG.initMom||0)+shifts.reduce((a,s)=>a+(s.mom!=null?s.mom:calc(s.gross,s.fuel,s.food).mom),0)+fundDeposits.filter(d=>d.fund==='mom').reduce((a,d)=>a+d.amount,0);
+  const totalMomAcc=(CFG.initMom||0)+shifts.reduce((a,s)=>a+(s.mom||0),0)+fundDeposits.filter(d=>d.fund==='mom').reduce((a,d)=>a+d.amount,0);
   const momSpent=fundExpenses.filter(e=>e.fund==='mom').reduce((a,e)=>a+e.amount,0);
   const totalPaid=totalMomAcc-momSpent;
-  const totalRepairAcc=shifts.reduce((a,s)=>a+calc(s.gross,s.fuel,s.food).repair,0);
-  const totalPillowAcc=shifts.reduce((a,s)=>a+calc(s.gross,s.fuel,s.food).pillow,0);
-  const totalCarAcc=shifts.reduce((a,s)=>a+calc(s.gross,s.fuel,s.food).car,0);
+  const totalRepairAcc=shifts.reduce((a,s)=>a+(s.repair||0),0);
+  const totalPillowAcc=shifts.reduce((a,s)=>a+(s.pillow||0),0);
+  const totalCarAcc=shifts.reduce((a,s)=>a+(s.car||0),0);
   const repairSpent=fundExpenses.filter(e=>e.fund==='repair').reduce((a,e)=>a+e.amount,0);
   const pillowSpent=fundExpenses.filter(e=>e.fund==='pillow').reduce((a,e)=>a+e.amount,0);
   const carSpent=fundExpenses.filter(e=>e.fund==='car').reduce((a,e)=>a+e.amount,0);
@@ -300,15 +300,14 @@ function renderDash(c){
   let mineVal='—',mineSub='Добавь первую смену';
   let transfers=[];
   if(last){
-    const lc=calc(last.gross,last.fuel,last.food);
-    mineVal=fmt(lc.mine);
+    mineVal=fmt(last.mine||0);
     mineSub='Смена '+fmtD(last.date);
     transfers=[
-      {icon:'ti-tool',l:'Ремонт. фонд',v:lc.repair,bg:'var(--yellow-lt)',c:'#BF360C'},
-      {icon:'ti-heart',l:'Маме',v:lc.mom,bg:'var(--red-lt)',c:'var(--red)'},
-      {icon:'ti-building-bank',l:'Подушка безопасности',v:lc.pillow,bg:'var(--blue-lt)',c:'var(--blue)'},
-      {icon:'ti-car',l:'Новая машина',v:lc.car,bg:'var(--purple-lt)',c:'var(--purple)'},
-      {icon:'ti-wallet',l:'Себе',v:lc.mine,bg:'var(--green-lt)',c:'var(--green)'},
+      {icon:'ti-tool',l:'Ремонт. фонд',v:last.repair||0,bg:'var(--yellow-lt)',c:'#BF360C'},
+      {icon:'ti-heart',l:'Маме',v:last.mom||0,bg:'var(--red-lt)',c:'var(--red)'},
+      {icon:'ti-building-bank',l:'Подушка безопасности',v:last.pillow||0,bg:'var(--blue-lt)',c:'var(--blue)'},
+      {icon:'ti-car',l:'Новая машина',v:last.car||0,bg:'var(--purple-lt)',c:'var(--purple)'},
+      {icon:'ti-wallet',l:'Себе',v:last.mine||0,bg:'var(--green-lt)',c:'var(--green)'},
     ];
   }
 
@@ -422,11 +421,11 @@ function renderHistory(c){
   el.innerHTML=items.map(item=>{
     if(item.type==='shift'){
       const s=item.data;
-      const x=calc(s.gross,s.fuel,s.food);
-      const sMom=(s.mom!=null&&s.mom>0)?s.mom:x.mom;
-      const sRepair=(s.repair!=null&&s.repair>0)?s.repair:x.repair;
-      const sPillow=(s.pillow!=null&&s.pillow>0)?s.pillow:x.pillow;
-      const sMine=(s.mine!=null&&s.mine>0)?s.mine:x.mine;
+      const sNet=s.net||(s.gross-s.fuel-s.food);
+      const sMom=s.mom||0;
+      const sRepair=s.repair||0;
+      const sPillow=s.pillow||0;
+      const sMine=s.mine||sNet-(sMom+sRepair+sPillow+(s.car||0));
       return`<div class="hcard">
         <div class="hcard-top">
           <div class="hcard-date">${fmtD(s.date)}</div>
@@ -575,12 +574,12 @@ function renderStats(c){
   const totalGross=monthShifts.reduce((a,s)=>a+s.gross,0);
   const totalFuel=monthShifts.reduce((a,s)=>a+s.fuel,0);
   const totalFood=monthShifts.reduce((a,s)=>a+s.food,0);
-  const totalNet=monthShifts.reduce((a,s)=>a+calc(s.gross,s.fuel,s.food).net,0);
-  const totalRepF=monthShifts.reduce((a,s)=>a+calc(s.gross,s.fuel,s.food).repair,0);
-  const totalPilF=monthShifts.reduce((a,s)=>a+calc(s.gross,s.fuel,s.food).pillow,0);
-  const totalCarF=monthShifts.reduce((a,s)=>a+calc(s.gross,s.fuel,s.food).car,0);
-  const totalMom=monthShifts.reduce((a,s)=>a+(s.mom!=null?s.mom:calc(s.gross,s.fuel,s.food).mom),0);
-  const totalMine=monthShifts.reduce((a,s)=>a+calc(s.gross,s.fuel,s.food).mine,0);
+  const totalNet=monthShifts.reduce((a,s)=>a+(s.net||(s.gross-s.fuel-s.food)),0);
+  const totalRepF=monthShifts.reduce((a,s)=>a+(s.repair||0),0);
+  const totalPilF=monthShifts.reduce((a,s)=>a+(s.pillow||0),0);
+  const totalCarF=monthShifts.reduce((a,s)=>a+(s.car||0),0);
+  const totalMom=monthShifts.reduce((a,s)=>a+(s.mom||0),0);
+  const totalMine=monthShifts.reduce((a,s)=>a+(s.mine||(s.net||(s.gross-s.fuel-s.food))-(s.mom||0)-(s.repair||0)-(s.pillow||0)-(s.car||0)),0);
   const repExp=monthExp.filter(e=>e.fund==='repair').reduce((a,e)=>a+e.amount,0);
   const pilExp=monthExp.filter(e=>e.fund==='pillow').reduce((a,e)=>a+e.amount,0);
   const carExp=monthExp.filter(e=>e.fund==='car').reduce((a,e)=>a+e.amount,0);
