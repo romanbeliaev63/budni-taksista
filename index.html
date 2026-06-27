@@ -440,7 +440,7 @@ function renderHistory(c){
           <span>Подушка: <b>${fmt(x.pillow)}</b></span>
         </div>
       </div>`;
-    } else {
+    } else if(item.type==='expense'){
       const e=item.data;
       return`<div class="hcard expense">
         <div class="hcard-top">
