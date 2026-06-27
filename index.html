@@ -300,12 +300,12 @@ function renderDash(c){
   let mineVal='—',mineSub='Добавь первую смену';
   let transfers=[];
   if(last){
-    const lc=calc(last.gross,last.fuel,last.food,last.mom);
+    const lc=calc(last.gross,last.fuel,last.food);
     mineVal=fmt(lc.mine);
     mineSub='Смена '+fmtD(last.date);
     transfers=[
       {icon:'ti-tool',l:'Ремонт. фонд',v:lc.repair,bg:'var(--yellow-lt)',c:'#BF360C'},
-      {icon:'ti-heart',l:'Маме',v:last.mom,bg:'var(--red-lt)',c:'var(--red)'},
+      {icon:'ti-heart',l:'Маме',v:lc.mom,bg:'var(--red-lt)',c:'var(--red)'},
       {icon:'ti-building-bank',l:'Подушка безопасности',v:lc.pillow,bg:'var(--blue-lt)',c:'var(--blue)'},
       {icon:'ti-car',l:'Новая машина',v:lc.car,bg:'var(--purple-lt)',c:'var(--purple)'},
       {icon:'ti-wallet',l:'Себе',v:lc.mine,bg:'var(--green-lt)',c:'var(--green)'},
@@ -586,7 +586,7 @@ function renderStats(c){
   let bestShift=null;
   shifts.forEach(s=>{
     const mine=calc(s.gross,s.fuel,s.food).mine;
-    if(!bestShift||mine>calc(bestShift.gross,bestShift.fuel,bestShift.food,bestShift.mom).mine)bestShift=s;
+    if(!bestShift||mine>calc(bestShift.gross,bestShift.fuel,bestShift.food).mine)bestShift=s;
   });
   const monthNetMap={};
   shifts.forEach(s=>{const m=s.date.slice(0,7);if(!monthNetMap[m])monthNetMap[m]=0;monthNetMap[m]+=calc(s.gross,s.fuel,s.food).net;});
@@ -598,7 +598,7 @@ function renderStats(c){
     if(diff===1){curStr++;maxStreak=Math.max(maxStreak,curStr);}else curStr=1;
   }
 
-  const bestShiftVal=bestShift?calc(bestShift.gross,bestShift.fuel,bestShift.food,bestShift.mom).mine:0;
+  const bestShiftVal=bestShift?calc(bestShift.gross,bestShift.fuel,bestShift.food).mine:0;
   const bestMonthVal=bestMonthEntry?bestMonthEntry[1]:0;
   const bestMonthLbl=bestMonthEntry?mNames[parseInt(bestMonthEntry[0].slice(5))-1]+' '+bestMonthEntry[0].slice(0,4):'—';
 
